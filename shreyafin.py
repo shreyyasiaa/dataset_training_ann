@@ -497,6 +497,7 @@ def train_regression_model(df):
         st.subheader("Download LazyPredict Models")
         st.write("Click the button below to download the LazyPredict models:")
         lp.save_models()
+        st.download_button(label="Download LazyPredict Models", data=open("saved_models.zip", "rb").read(), file_name="saved_models.zip")
         
         
     else:
@@ -538,9 +539,7 @@ def train_regression_model(df):
 
         st.subheader("8.Download the trained model")
         st.download_button(label="Download Model", data=open(model_filename, "rb").read(), file_name=model_filename)
-        st.subheader("Download LazyPredict Models")
-        st.write("Click the button below to download the LazyPredict models:")
-        lp.save_models()  # Save LazyPredict models
+        # Save LazyPredict models
 
 
 def ploty():
