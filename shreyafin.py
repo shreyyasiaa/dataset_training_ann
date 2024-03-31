@@ -243,63 +243,7 @@ def analyze_csv(df):
     st.write("Correlation Matrix:")
     st.dataframe(correlation_matrix)
 
-    # Input data for which we want to predict the average values
-    q1 = np.array([[num_records,num_columns,num_textual_columns,num_numeric_columns,num_highly_dependent_columns]])  # Example input data, 1 row, 6 columns
-    avg_neighbors = knn.predict(q1)
-
-    # Apply sigmoid to the first two elements
-    for i in range(len(avg_neighbors)):
-        # avg_neighbors[i][0] = 1 / (1 + np.exp(-avg_neighbors[i][0]))
-        # avg_neighbors[i][1] = 1 / (1 + np.exp(-avg_neighbors[i][1]))
-        avg_neighbors[i][0] = 1 if avg_neighbors[i][0] >= 0.5 else 0
-        # avg_neighbors[i][1] = 1 if avg_neighbors[i][1] >= 0.5 else 0
-
-    # st.write("Output using KNN of info 1-Bidirectional,Return Sequence,Dropout,Epochs,BatchSize:")
-    # st.write(avg_neighbors)
-    # st.write(avg_neighbors.shape)
-    global epoch,batch,drop,returseq,bidi,opi
-    #poch,batch,drop,returseq,bidi
-    epoch=avg_neighbors[0][2]
-    batch=avg_neighbors[0][3]
-    drop=avg_neighbors[0][1]
-    opi=avg_neighbors[0][0]
-
    
-
-    # #Dense Layer thing
-    X = dataset[['Number Of Records', 'Number Of Columns', 
-                 'Number of Textual Columns', 'Number of Numeric Columns', 'Total Number of highly dependent columns']].values
-    y = dataset[['Hidden units']].values
-    knn = KNNUnsupervisedLSTM(k=3)
-    knn.fit(X, y)
-    
-    
-    avg_neighbors, neighbor_indices = knn.predict(q1)
-
-    # Extract Dense layers of k-nearest neighbors
-    dense_layers = y[neighbor_indices[:, 0], 0]  # Extract Dense layers corresponding to the indices of k-nearest neighbors
-    dense_layers_array = []
-    for layers in dense_layers:
-        layers_list = [int(x) for x in layers.strip('[]').split(',')]
-        dense_layers_array.append(layers_list)
-
-    # Get the maximum length of nested lists
-    max_length = max(len(layers) for layers in dense_layers_array)
-
-    # Pad shorter lists with zeros to match the length of the longest list
-    padded_dense_layers_array = [layers + [0] * (max_length - len(layers)) for layers in dense_layers_array]
-
-    # Convert the padded list of lists to a numpy array
-    dense_layers_array_transpose = np.array(padded_dense_layers_array).T
-
-    # Calculate the average of each element in the nested lists
-    avg_dense_layers = np.mean(dense_layers_array_transpose, axis=1)
-
-    global output_array_d
-    # Print the output in the form of an array
-    output_array_d = np.array(list(avg_dense_layers))
-    # st.write("Dense layer output:")
-    # st.write(output_array_d)
 
 
 
