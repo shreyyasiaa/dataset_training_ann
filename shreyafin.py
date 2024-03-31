@@ -39,8 +39,7 @@ drop=0
 returnseq=0
 bidi=0
 
-url = "sisi.csv"
-dataset = pd.read_csv(url)
+dataset = pd.read_csv("/content/sisi.csv")
 import numpy as np
 
 class LazyPredict:
@@ -213,14 +212,14 @@ def analyze_csv(df):
 
     # In this example, let's assume highly dependent columns are those with correlation coefficient above 0.8
     highly_dependent_columns = set()
-    #correlation_matrix = df.corr()
-    #for i in range(len(correlation_matrix.columns)):
-     #   for j in range(i):
-      #      if abs(correlation_matrix.iloc[i, j]) > 0.8:
-       #         col1 = correlation_matrix.columns[i]
-        #        col2 = correlation_matrix.columns[j]
-         #       highly_dependent_columns.add(col1)
-          #      highly_dependent_columns.add(col2)
+    correlation_matrix = df.corr()
+    for i in range(len(correlation_matrix.columns)):
+        for j in range(i):
+            if abs(correlation_matrix.iloc[i, j]) > 0.8:
+                col1 = correlation_matrix.columns[i]
+                col2 = correlation_matrix.columns[j]
+                highly_dependent_columns.add(col1)
+                highly_dependent_columns.add(col2)
 
     num_highly_dependent_columns = len(highly_dependent_columns)
 
@@ -300,7 +299,17 @@ def analyze_csv(df):
 
 
 
-
+def handle_textual_columns(df):
+    # Find textual columns
+    
+    
+    # Initialize label encoder
+    label_encoder = LabelEncoder()
+    
+    # Iterate over each textual column
+    df = df.apply(lambda x: label_encoder.fit_transform(x) if x.dtype == 'O' else x)
+    
+    return df
 
 def load_data(file):
     df = pd.read_csv(file)
@@ -310,7 +319,7 @@ def load_data(file):
     df.dropna(inplace=True)
     
     # Handle textual columns using label encoding
- 
+    df = handle_textual_columns(df)
      # Call analyze_csv function here
 
     return df
@@ -334,6 +343,7 @@ def show_missing_values(df):
 def handle_missing_values(df):
     st.subheader("4. Handle missing values")
     numeric_columns = df.select_dtypes(include=['number']).columns
+    textual_columns = df.select_dtypes(include=['object']).columns
 
     fill_option = st.radio("Choose a method to handle missing values:", ('Mean', 'Median', 'Mode', 'Drop'))
 
@@ -346,8 +356,6 @@ def handle_missing_values(df):
                   else df[numeric_columns].mode().iloc[0])
         )
         df[numeric_columns] = df[numeric_columns].fillna(fill_value)
-
-  
     label_encoders = {}
     for col in textual_columns:
         if col not in df.columns:
@@ -363,7 +371,7 @@ def handle_missing_values(df):
 
     st.dataframe(df)
 
-    return df
+    return df,label_encoders
 
 def drop_column(df):
     st.subheader("5. Drop a column")
@@ -402,7 +410,7 @@ def build_model(dense_layers,dropout):
     else:
       model.compile(optimizer='sgd', loss='mse') 
 
-    model.build()  # Explicitly build the model
+    model.build((None, None, dense_layers[0]))  # Explicitly build the model
 
     return model
 
@@ -552,7 +560,7 @@ def main():
         df = load_data(uploaded_file)
 
         if not df.select_dtypes(include=['number']).empty:
-            #show_correlation(df)
+            show_correlation(df)
             show_missing_values(df)
             df = handle_missing_values(df)
 
