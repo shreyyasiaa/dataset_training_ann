@@ -300,17 +300,7 @@ def analyze_csv(df):
 
 
 
-def handle_textual_columns(df):
-    # Find textual columns
-    
-    
-    # Initialize label encoder
-    label_encoder = LabelEncoder()
-    
-    # Iterate over each textual column
-    df = df.apply(lambda x: label_encoder.fit_transform(x) if x.dtype == 'O' else x)
-    
-    return df
+
 
 def load_data(file):
     df = pd.read_csv(file)
@@ -320,7 +310,7 @@ def load_data(file):
     df.dropna(inplace=True)
     
     # Handle textual columns using label encoding
-    df = handle_textual_columns(df)
+ 
      # Call analyze_csv function here
 
     return df
@@ -356,6 +346,20 @@ def handle_missing_values(df):
                   else df[numeric_columns].mode().iloc[0])
         )
         df[numeric_columns] = df[numeric_columns].fillna(fill_value)
+
+  
+    label_encoders = {}
+    for col in textual_columns:
+        if col not in df.columns:
+            continue
+        le = LabelEncoder()
+        df[col] = df[col].fillna("")  # Fill missing values with empty strings
+        df[col] = le.fit_transform(df[col])
+        # Store the label encoder for inverse transformation
+        label_encoders[col] = le
+
+        # Add another column for reverse inverse label encoding
+        df[f'{col}_inverse'] = le.inverse_transform(df[col])
 
     st.dataframe(df)
 
