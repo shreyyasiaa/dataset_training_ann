@@ -398,7 +398,7 @@ def build_model(dense_layers,dropout):
     else:
       model.compile(optimizer='sgd', loss='mse') 
 
-    model.build((None, None, dense_layers[0]))  # Explicitly build the model
+    model.build()  # Explicitly build the model
 
     return model
 
