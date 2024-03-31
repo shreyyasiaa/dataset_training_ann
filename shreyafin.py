@@ -487,7 +487,7 @@ def train_regression_model(df):
     
     # Use LazyPredict to get model accuracies
    
-      if proceed_with_ann:
+    if proceed_with_ann:
         st.write("One or more models from LazyPredict have accuracy more than 80%. Skipping ANN training.")
         st.write("Models with accuracy greater than 80%:")
         for model, accuracy in results.items():
