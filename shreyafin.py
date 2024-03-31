@@ -492,6 +492,9 @@ def train_regression_model(df):
         st.write("Models with accuracy greater than 80%:")
         for model, accuracy in results.items():
             st.write(f"- {model}: {accuracy:.2f}%")
+        st.subheader("Download LazyPredict Models")
+        st.write("Click the button below to download the LazyPredict models:")
+        lazy_predictor.save_models()
         
         
     else:
