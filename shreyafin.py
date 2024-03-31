@@ -38,7 +38,7 @@ batch=0
 drop=0
 returnseq=0
 bidi=0
-
+global output_array_d=[50,50]
 
 url = "sisi.csv"
 dataset = pd.read_csv(url)
