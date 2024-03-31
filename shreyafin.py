@@ -110,21 +110,7 @@ class LazyPredict:
 
         return results
 
-    def save_models(self, directory="./saved_models"):
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-    # Create a new ZIP file
-        zip_filename = os.path.join(directory, "saved_models.zip")
-        with zipfile.ZipFile(zip_filename, "w") as zipf:
-        # Iterate over each model and save it to the ZIP file
-            for name, model in self.models.items():
-                filename = os.path.join(directory, f"{name}.pkl")
-                joblib.dump(model, filename)
-            # Add the model file to the ZIP archive
-                zipf.write(filename, os.path.basename(filename))
-
-        return zip_filename
+    
 
 
     def predict_new_data(self, new_data):
@@ -503,10 +489,17 @@ def train_regression_model(df):
        
         for model, accuracy in results.items():
             st.write(f"- {model}: {accuracy:.2f}%")
-        st.subheader("Download LazyPredict Models")
-        st.write("Click the button below to download the LazyPredict models:")
-        lp.save_models()
-        st.download_button(label="Download LazyPredict Models", data=open("saved_models.zip", "rb").read(), file_name="saved_models.zip")
+        max_accuracy_model = max(results, key=results.get)
+        best_lp_model = lp.models[max_accuracy_model]
+
+        # Save the best LazyPredict model
+        lp_model_filename = f"best_lp_model.pkl"
+        joblib.dump(best_lp_model, lp_model_filename)
+
+        # Provide a download button for the best LazyPredict model
+        st.subheader("Download Best LazyPredict Model")
+        st.write("Click the button below to download the best LazyPredict model:")
+        st.download_button(label="Download LazyPredict Model", data=open(lp_model_filename, "rb").read(), file_name=lp_model_filename)
         
         
     else:
