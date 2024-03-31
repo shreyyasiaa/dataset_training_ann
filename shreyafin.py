@@ -50,6 +50,7 @@ class LazyPredict:
         self.X = self.data[x_columns]
         self.y = self.data[y_column]
         self.is_regression = self.is_regression()
+        self.models = {}  # Dictionary to store trained models
 
     def is_regression(self):
         # Calculate the number of unique values in the target column
@@ -81,6 +82,9 @@ class LazyPredict:
                 variance = np.var(y_test)
                 accuracy = (1 - (mse / variance))*100
                 results[name] = accuracy
+
+                if accuracy > 80:  # Save the model if accuracy is greater than 80%
+                    self.models[name] = model
         else:
             models = {
                 "Logistic Regression": LogisticRegression(),
@@ -98,7 +102,18 @@ class LazyPredict:
                 accuracy = accuracy_score(y_test, y_pred)*100
                 results[name] = accuracy
 
+                if accuracy > 80:  # Save the model if accuracy is greater than 80%
+                    self.models[name] = model
+
         return results
+
+    def save_models(self, directory="./saved_models"):
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        
+        for name, model in self.models.items():
+            filename = os.path.join(directory, f"{name}.pkl")
+            joblib.dump(model, filename)
 
 
     def predict_new_data(self, new_data):
@@ -334,6 +349,8 @@ def show_missing_values(df):
 def handle_missing_values(df):
     st.subheader("4. Handle missing values")
     numeric_columns = df.select_dtypes(include=['number']).columns
+  
+    textual_columns = df.select_dtypes(include=['object']).columns
 
     fill_option = st.radio("Choose a method to handle missing values:", ('Mean', 'Median', 'Mode', 'Drop'))
 
@@ -470,11 +487,11 @@ def train_regression_model(df):
     
     # Use LazyPredict to get model accuracies
    
-    if proceed_with_ann:
-        formatted_results = {model: f"{accuracy:.2f}%" for model, accuracy in results.items()}
-        formatted_results_json = json.dumps(formatted_results)
+      if proceed_with_ann:
         st.write("One or more models from LazyPredict have accuracy more than 80%. Skipping ANN training.")
-        st.write(json.loads(formatted_results_json))
+        st.write("Models with accuracy greater than 80%:")
+        for model, accuracy in results.items():
+            st.write(f"- {model}: {accuracy:.2f}%")
         
         
     else:
@@ -516,7 +533,9 @@ def train_regression_model(df):
 
         st.subheader("8.Download the trained model")
         st.download_button(label="Download Model", data=open(model_filename, "rb").read(), file_name=model_filename)
-  
+        st.subheader("Download LazyPredict Models")
+        st.write("Click the button below to download the LazyPredict models:")
+        lazy_predictor.save_models()  # Save LazyPredict models
 
 
 def ploty():
