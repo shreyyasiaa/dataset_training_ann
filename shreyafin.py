@@ -18,6 +18,7 @@ import tensorflow as tf
 from dateutil.parser import parse
 import matplotlib.pyplot as plt
 import re
+import os
 import tensorflow as tf
 from tensorflow.keras.layers import LSTM, Bidirectional, Dropout, Dense
 import pandas as pd
