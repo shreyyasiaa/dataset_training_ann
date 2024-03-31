@@ -8,6 +8,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import tensorflow as tf
 import numpy as np
 import streamlit as st
+import joblib
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
