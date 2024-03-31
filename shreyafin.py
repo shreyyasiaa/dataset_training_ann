@@ -494,7 +494,7 @@ def train_regression_model(df):
             st.write(f"- {model}: {accuracy:.2f}%")
         st.subheader("Download LazyPredict Models")
         st.write("Click the button below to download the LazyPredict models:")
-        lazy_predictor.save_models()
+        lp.save_models()
         
         
     else:
@@ -538,7 +538,7 @@ def train_regression_model(df):
         st.download_button(label="Download Model", data=open(model_filename, "rb").read(), file_name=model_filename)
         st.subheader("Download LazyPredict Models")
         st.write("Click the button below to download the LazyPredict models:")
-        lazy_predictor.save_models()  # Save LazyPredict models
+        lp.save_models()  # Save LazyPredict models
 
 
 def ploty():
