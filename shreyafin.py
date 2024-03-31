@@ -20,6 +20,7 @@ from dateutil.parser import parse
 import matplotlib.pyplot as plt
 import re
 import os
+import zipfile
 import tensorflow as tf
 from tensorflow.keras.layers import LSTM, Bidirectional, Dropout, Dense
 import pandas as pd
@@ -111,11 +112,19 @@ class LazyPredict:
 
     def save_models(self, directory="./saved_models"):
         if not os.path.exists(directory):
-            os.makedirs(directory)
-        
-        for name, model in self.models.items():
-            filename = os.path.join(directory, f"{name}.pkl")
-            joblib.dump(model, filename)
+        os.makedirs(directory)
+
+    # Create a new ZIP file
+        zip_filename = os.path.join(directory, "saved_models.zip")
+        with zipfile.ZipFile(zip_filename, "w") as zipf:
+        # Iterate over each model and save it to the ZIP file
+            for name, model in self.models.items():
+                filename = os.path.join(directory, f"{name}.pkl")
+                joblib.dump(model, filename)
+            # Add the model file to the ZIP archive
+                zipf.write(filename, os.path.basename(filename))
+
+        return zip_filename
 
 
     def predict_new_data(self, new_data):
@@ -491,7 +500,7 @@ def train_regression_model(df):
    
     if proceed_with_ann:
         st.write("One or more models from LazyPredict have accuracy more than 80%. Skipping ANN training.")
-        st.write("Models with accuracy greater than 80%:")
+       
         for model, accuracy in results.items():
             st.write(f"- {model}: {accuracy:.2f}%")
         st.subheader("Download LazyPredict Models")
