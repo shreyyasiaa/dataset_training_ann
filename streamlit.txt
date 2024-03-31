@@ -1,0 +1,10 @@
+streamlit
+pandas
+seaborn
+matplotlib
+scikit-learn
+tensorflow
+dateutils
+re
+xgboost
+jsonlib
