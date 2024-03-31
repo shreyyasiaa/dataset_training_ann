@@ -112,7 +112,7 @@ class LazyPredict:
 
     def save_models(self, directory="./saved_models"):
         if not os.path.exists(directory):
-        os.makedirs(directory)
+            os.makedirs(directory)
 
     # Create a new ZIP file
         zip_filename = os.path.join(directory, "saved_models.zip")
