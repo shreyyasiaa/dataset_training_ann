@@ -214,14 +214,14 @@ def analyze_csv(df):
 
     # In this example, let's assume highly dependent columns are those with correlation coefficient above 0.8
     highly_dependent_columns = set()
-    correlation_matrix = df.corr()
-    for i in range(len(correlation_matrix.columns)):
-        for j in range(i):
-            if abs(correlation_matrix.iloc[i, j]) > 0.8:
-                col1 = correlation_matrix.columns[i]
-                col2 = correlation_matrix.columns[j]
-                highly_dependent_columns.add(col1)
-                highly_dependent_columns.add(col2)
+    #correlation_matrix = df.corr()
+    #for i in range(len(correlation_matrix.columns)):
+     #   for j in range(i):
+      #      if abs(correlation_matrix.iloc[i, j]) > 0.8:
+       #         col1 = correlation_matrix.columns[i]
+        #        col2 = correlation_matrix.columns[j]
+         #       highly_dependent_columns.add(col1)
+          #      highly_dependent_columns.add(col2)
 
     num_highly_dependent_columns = len(highly_dependent_columns)
 
@@ -234,12 +234,14 @@ def analyze_csv(df):
     st.write("Number of Numeric Columns:", num_numeric_columns)
 
     st.write("Total Number of highly dependent columns:", num_highly_dependent_columns)
-    X = dataset[['Number Of Records', 'Number Of Columns',
-                 'Number of Textual Columns', 'Number of Numeric Columns', 'Total Number of highly dependent columns']].values
-    y = dataset[['Optimizer','Dropout', 'Epochs', 'Batch Size']].values
 
-    knn = KNNUnsupervised(k=3)
-    knn.fit(X, y)
+    # Drop non-numeric columns before computing correlation
+    numeric_df = df.select_dtypes(include=['number'])
+    correlation_matrix = numeric_df.corr()
+
+    # Display correlation matrix
+    st.write("Correlation Matrix:")
+    st.dataframe(correlation_matrix)
 
     # Input data for which we want to predict the average values
     q1 = np.array([[num_records,num_columns,num_textual_columns,num_numeric_columns,num_highly_dependent_columns]])  # Example input data, 1 row, 6 columns
