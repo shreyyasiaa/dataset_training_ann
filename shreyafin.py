@@ -39,7 +39,8 @@ drop=0
 returnseq=0
 bidi=0
 
-dataset = pd.read_csv("/content/sisi.csv")
+url = "https://github.com/shreyyasiaa/dataset_training_ann/blob/36c1e464fd12dc4e8b603ced0a53acf8d414c96e/sisi.csv"
+dataset = pd.read_csv(url)
 import numpy as np
 
 class LazyPredict:
