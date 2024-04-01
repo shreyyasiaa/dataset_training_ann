@@ -444,7 +444,7 @@ def train_regression_model(df):
     results = lp.fit_predict()
 
     # Check if any model's accuracy is less than 80 percent
-    proceed_with_ann = any(accuracy >= 80.0 for accuracy in results.values())
+    proceed_with_ann = any(accuracy >= 95.0 for accuracy in results.values())
 
     df = df.dropna(subset=[y_column])
 
