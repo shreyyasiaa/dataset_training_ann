@@ -442,7 +442,7 @@ def train_regression_model(df):
     results = lp.fit_predict()
 
     # Check if any model's accuracy is less than 80 percent
-    proceed_with_ann = any(accuracy >= 80.0 for accuracy in results.values())
+    proceed_with_ann = any(accuracy >= 95.0 for accuracy in results.values())
 
     df = df.dropna(subset=[y_column])
 
@@ -530,6 +530,8 @@ def train_regression_model(df):
         st.write("Final Validation loss is-", val_loss[-1])
         st.write("Training losses", train_loss)
         st.write("Validation losses", val_loss)
+        loss, accuracy = model.evaluate(X_test, y_test)
+        st.write("ANN Accuracy:", accuracy)
 
         ploty()
 
