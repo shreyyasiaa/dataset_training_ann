@@ -234,7 +234,7 @@ def analyze_csv(df):
         # Add another column for reverse inverse label encoding
         #df[f'{col}_inverse'] = le.inverse_transform(df[col])
 
-    st.dataframe(df)
+   
 
     
     highly_dependent_columns = set()
@@ -530,7 +530,7 @@ def train_regression_model(df):
         st.write("Final Validation loss is-", val_loss[-1])
         st.write("Training losses", train_loss)
         st.write("Validation losses", val_loss)
-        accuracy = model.evaluate(X_test, y_test)
+        accuracy = accuracy_score(y_test, y_pred)
         st.write("ANN Accuracy:", accuracy)
 
         ploty()
