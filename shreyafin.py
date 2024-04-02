@@ -8,6 +8,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import tensorflow as tf
 import numpy as np
 import streamlit as st
+import joblib
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -18,6 +19,8 @@ import tensorflow as tf
 from dateutil.parser import parse
 import matplotlib.pyplot as plt
 import re
+import os
+import zipfile
 import tensorflow as tf
 from tensorflow.keras.layers import LSTM, Bidirectional, Dropout, Dense
 import pandas as pd
@@ -38,7 +41,6 @@ batch=0
 drop=0
 returnseq=0
 bidi=0
-global output_array_d=[50,50]
 
 url = "sisi.csv"
 dataset = pd.read_csv(url)
@@ -51,6 +53,7 @@ class LazyPredict:
         self.X = self.data[x_columns]
         self.y = self.data[y_column]
         self.is_regression = self.is_regression()
+        self.models = {}  # Dictionary to store trained models
 
     def is_regression(self):
         # Calculate the number of unique values in the target column
@@ -82,6 +85,9 @@ class LazyPredict:
                 variance = np.var(y_test)
                 accuracy = (1 - (mse / variance))*100
                 results[name] = accuracy
+
+                if accuracy > 80:  # Save the model if accuracy is greater than 80%
+                    self.models[name] = model
         else:
             models = {
                 "Logistic Regression": LogisticRegression(),
@@ -99,7 +105,12 @@ class LazyPredict:
                 accuracy = accuracy_score(y_test, y_pred)*100
                 results[name] = accuracy
 
+                if accuracy > 80:  # Save the model if accuracy is greater than 80%
+                    self.models[name] = model
+
         return results
+
+    
 
 
     def predict_new_data(self, new_data):
@@ -192,7 +203,7 @@ def analyze_csv(df):
 
     # Get the number of columns
     num_columns = len(df.columns)
-
+    
     # Initialize counters for textual, numeric, and date columns
     num_textual_columns = 0
     num_numeric_columns = 0
@@ -208,24 +219,37 @@ def analyze_csv(df):
                 num_textual_columns += 1
         elif pd.api.types.is_numeric_dtype(df[col]):
             num_numeric_columns += 1
+    
+    textual_columns = df.select_dtypes(include=['object']).columns
+    label_encoders = {}
+    for col in textual_columns:
+        if col not in df.columns:
+            continue
+        le = LabelEncoder()
+        df[col] = df[col].fillna("")  # Fill missing values with empty strings
+        df[col] = le.fit_transform(df[col])
+        # Store the label encoder for inverse transformation
+        label_encoders[col] = le
 
-    # Find highly dependent columns (you may need to define what "highly dependent" means)
-    # For example, you can use correlation coefficients or other statistical measures
+        # Add another column for reverse inverse label encoding
+        #df[f'{col}_inverse'] = le.inverse_transform(df[col])
 
-    # In this example, let's assume highly dependent columns are those with correlation coefficient above 0.8
+    st.dataframe(df)
+
+    return df
     highly_dependent_columns = set()
-    #correlation_matrix = df.corr()
-    #for i in range(len(correlation_matrix.columns)):
-     #   for j in range(i):
-      #      if abs(correlation_matrix.iloc[i, j]) > 0.8:
-       #         col1 = correlation_matrix.columns[i]
-        #        col2 = correlation_matrix.columns[j]
-         #       highly_dependent_columns.add(col1)
-          #      highly_dependent_columns.add(col2)
+    correlation_matrix = df.corr()
+    for i in range(len(correlation_matrix.columns)):
+        for j in range(i):
+            if abs(correlation_matrix.iloc[i, j]) > 0.8:
+                col1 = correlation_matrix.columns[i]
+                col2 = correlation_matrix.columns[j]
+                highly_dependent_columns.add(col1)
+                highly_dependent_columns.add(col2)
 
     num_highly_dependent_columns = len(highly_dependent_columns)
 
-    # Output the results
+        ##Output the results
     st.write("Number Of Records:", num_records)
     st.write("Number Of Columns:", num_columns)
     st.write("Number of Date Columns:", num_date_columns)
@@ -234,30 +258,74 @@ def analyze_csv(df):
     st.write("Number of Numeric Columns:", num_numeric_columns)
 
     st.write("Total Number of highly dependent columns:", num_highly_dependent_columns)
+    X = dataset[['Number Of Records', 'Number Of Columns',
+                 'Number of Textual Columns', 'Number of Numeric Columns', 'Total Number of highly dependent columns']].values
+    y = dataset[['Optimizer','Dropout', 'Epochs', 'Batch Size']].values
 
-    # Drop non-numeric columns before computing correlation
-    numeric_df = df.select_dtypes(include=['number'])
-    correlation_matrix = numeric_df.corr()
+    knn = KNNUnsupervised(k=3)
+    knn.fit(X, y)
 
-    # Display correlation matrix
-    st.write("Correlation Matrix:")
-    st.dataframe(correlation_matrix)
+    # Input data for which we want to predict the average values
+    q1 = np.array([[num_records,num_columns,num_textual_columns,num_numeric_columns,num_highly_dependent_columns]])  # Example input data, 1 row, 6 columns
+    avg_neighbors = knn.predict(q1)
+
+    # Apply sigmoid to the first two elements
+    for i in range(len(avg_neighbors)):
+        # avg_neighbors[i][0] = 1 / (1 + np.exp(-avg_neighbors[i][0]))
+        # avg_neighbors[i][1] = 1 / (1 + np.exp(-avg_neighbors[i][1]))
+        avg_neighbors[i][0] = 1 if avg_neighbors[i][0] >= 0.5 else 0
+        # avg_neighbors[i][1] = 1 if avg_neighbors[i][1] >= 0.5 else 0
+
+    # st.write("Output using KNN of info 1-Bidirectional,Return Sequence,Dropout,Epochs,BatchSize:")
+    # st.write(avg_neighbors)
+    # st.write(avg_neighbors.shape)
+    global epoch,batch,drop,returseq,bidi,opi
+    #poch,batch,drop,returseq,bidi
+    epoch=avg_neighbors[0][2]
+    batch=avg_neighbors[0][3]
+    drop=avg_neighbors[0][1]
+    opi=avg_neighbors[0][0]
 
    
 
+    # #Dense Layer thing
+    X = dataset[['Number Of Records', 'Number Of Columns', 
+                 'Number of Textual Columns', 'Number of Numeric Columns', 'Total Number of highly dependent columns']].values
+    y = dataset[['Hidden units']].values
+    knn = KNNUnsupervisedLSTM(k=3)
+    knn.fit(X, y)
+    
+    
+    avg_neighbors, neighbor_indices = knn.predict(q1)
+
+    # Extract Dense layers of k-nearest neighbors
+    dense_layers = y[neighbor_indices[:, 0], 0]  # Extract Dense layers corresponding to the indices of k-nearest neighbors
+    dense_layers_array = []
+    for layers in dense_layers:
+        layers_list = [int(x) for x in layers.strip('[]').split(',')]
+        dense_layers_array.append(layers_list)
+
+    # Get the maximum length of nested lists
+    max_length = max(len(layers) for layers in dense_layers_array)
+
+    # Pad shorter lists with zeros to match the length of the longest list
+    padded_dense_layers_array = [layers + [0] * (max_length - len(layers)) for layers in dense_layers_array]
+
+    # Convert the padded list of lists to a numpy array
+    dense_layers_array_transpose = np.array(padded_dense_layers_array).T
+
+    # Calculate the average of each element in the nested lists
+    avg_dense_layers = np.mean(dense_layers_array_transpose, axis=1)
+
+    global output_array_d
+    # Print the output in the form of an array
+    output_array_d = np.array(list(avg_dense_layers))
+    # st.write("Dense layer output:")
+    # st.write(output_array_d)
 
 
-def handle_textual_columns(df):
-    # Find textual columns
-    
-    
-    # Initialize label encoder
-    label_encoder = LabelEncoder()
-    
-    # Iterate over each textual column
-    df = df.apply(lambda x: label_encoder.fit_transform(x) if x.dtype == 'O' else x)
-    
-    return df
+
+
 
 def load_data(file):
     df = pd.read_csv(file)
@@ -267,7 +335,7 @@ def load_data(file):
     df.dropna(inplace=True)
     
     # Handle textual columns using label encoding
-    df = handle_textual_columns(df)
+ 
      # Call analyze_csv function here
 
     return df
@@ -286,11 +354,12 @@ def show_missing_values(df):
     st.subheader("3. Show the number of missing values in each column")
     missing_values = df.isnull().sum()
     st.dataframe(missing_values)
-    st.write(output_array_d)
+   # st.write(output_array_d)
 
 def handle_missing_values(df):
     st.subheader("4. Handle missing values")
     numeric_columns = df.select_dtypes(include=['number']).columns
+  
     textual_columns = df.select_dtypes(include=['object']).columns
 
     fill_option = st.radio("Choose a method to handle missing values:", ('Mean', 'Median', 'Mode', 'Drop'))
@@ -304,22 +373,9 @@ def handle_missing_values(df):
                   else df[numeric_columns].mode().iloc[0])
         )
         df[numeric_columns] = df[numeric_columns].fillna(fill_value)
-    label_encoders = {}
-    for col in textual_columns:
-        if col not in df.columns:
-            continue
-        le = LabelEncoder()
-        df[col] = df[col].fillna("")  # Fill missing values with empty strings
-        df[col] = le.fit_transform(df[col])
-        # Store the label encoder for inverse transformation
-        label_encoders[col] = le
 
-        # Add another column for reverse inverse label encoding
-        df[f'{col}_inverse'] = le.inverse_transform(df[col])
-
-    st.dataframe(df)
-
-    return df,label_encoders
+  
+    return df
 
 def drop_column(df):
     st.subheader("5. Drop a column")
@@ -358,12 +414,12 @@ def build_model(dense_layers,dropout):
     else:
       model.compile(optimizer='sgd', loss='mse') 
 
-    model.build((None, None, dense_layers[0]))  # Explicitly build the model
+    model.build()  # Explicitly build the model
 
     return model
 
 def train_regression_model(df):
-    st.subheader("6. Train a Custom Time Series model")
+    st.subheader("6. Train a model")
 
     if df.empty:
         st.warning("Please upload a valid dataset.")
@@ -427,10 +483,21 @@ def train_regression_model(df):
     # Use LazyPredict to get model accuracies
    
     if proceed_with_ann:
-        formatted_results = {model: f"{accuracy:.2f}%" for model, accuracy in results.items()}
-        formatted_results_json = json.dumps(formatted_results)
         st.write("One or more models from LazyPredict have accuracy more than 80%. Skipping ANN training.")
-        st.write(json.loads(formatted_results_json))
+       
+        for model, accuracy in results.items():
+            st.write(f"- {model}: {accuracy:.2f}%")
+        max_accuracy_model = max(results, key=results.get)
+        best_lp_model = lp.models[max_accuracy_model]
+
+        # Save the best LazyPredict model
+        lp_model_filename = f"best_lp_model.pkl"
+        joblib.dump(best_lp_model, lp_model_filename)
+
+        # Provide a download button for the best LazyPredict model
+        st.subheader("Download Best LazyPredict Model")
+        st.write("Click the button below to download the best LazyPredict model:")
+        st.download_button(label="Download LazyPredict Model", data=open(lp_model_filename, "rb").read(), file_name=lp_model_filename)
         
         
     else:
@@ -472,7 +539,7 @@ def train_regression_model(df):
 
         st.subheader("8.Download the trained model")
         st.download_button(label="Download Model", data=open(model_filename, "rb").read(), file_name=model_filename)
-  
+        # Save LazyPredict models
 
 
 def ploty():
@@ -506,12 +573,14 @@ def main():
     if uploaded_file is not None:
         st.info("File uploaded successfully!")
         df = load_data(uploaded_file)
-
-        if not df.select_dtypes(include=['number']).empty:
-            # show_correlation(df)
+        
+        if not df.select_dtypes(include=['number']).empty or df.select_dtypes(include=['object']).empty :
             show_missing_values(df)
+            #show_correlation(df)
             df = handle_missing_values(df)
-
+            
+        
+        
         df = drop_column(df)
         train_regression_model(df)
   
