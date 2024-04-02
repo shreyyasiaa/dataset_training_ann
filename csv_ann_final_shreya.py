@@ -442,7 +442,7 @@ def train_regression_model(df):
     results = lp.fit_predict()
 
     # Check if any model's accuracy is less than 80 percent
-    proceed_with_ann = any(accuracy >= 95.0 for accuracy in results.values())
+    proceed_with_ann = any(accuracy >= 40.0 for accuracy in results.values())
 
     df = df.dropna(subset=[y_column])
 
@@ -484,8 +484,9 @@ def train_regression_model(df):
    
     if proceed_with_ann:
         st.write("One or more models from LazyPredict have accuracy more than 80%. Skipping ANN training.")
+        sorted_results = {k: v for k, v in sorted(results.items(), key=lambda item: item[1])}
        
-        for model, accuracy in results.items():
+        for model, accuracy in sorted_results.items():
             st.write(f"- {model}: {accuracy:.2f}%")
         max_accuracy_model = max(results, key=results.get)
         best_lp_model = lp.models[max_accuracy_model]
@@ -530,11 +531,7 @@ def train_regression_model(df):
         st.write("Final Validation loss is-", val_loss[-1])
         st.write("Training losses", train_loss)
         st.write("Validation losses", val_loss)
-        y_pred = model.predict(X_test)
-        mse = mean_squared_error(y_test, y_pred)
-        variance = np.var(y_test)
-        accuracy = (1 - (mse / variance))*100
-        st.write("ANN Accuracy:", accuracy)
+      
 
         ploty()
 
