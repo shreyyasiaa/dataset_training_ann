@@ -203,7 +203,7 @@ def analyze_csv(df):
 
     # Get the number of columns
     num_columns = len(df.columns)
-
+    
     # Initialize counters for textual, numeric, and date columns
     num_textual_columns = 0
     num_numeric_columns = 0
@@ -219,16 +219,33 @@ def analyze_csv(df):
                 num_textual_columns += 1
         elif pd.api.types.is_numeric_dtype(df[col]):
             num_numeric_columns += 1
+    
+    textual_columns = df.select_dtypes(include=['object']).columns
+    label_encoders = {}
+    for col in textual_columns:
+        if col not in df.columns:
+            continue
+        le = LabelEncoder()
+        df[col] = df[col].fillna("")  # Fill missing values with empty strings
+        df[col] = le.fit_transform(df[col])
+        # Store the label encoder for inverse transformation
+        label_encoders[col] = le
 
+        # Add another column for reverse inverse label encoding
+        #df[f'{col}_inverse'] = le.inverse_transform(df[col])
+
+    st.dataframe(df)
+
+    return df
     highly_dependent_columns = set()
-     #correlation_matrix = df.corr()
-     #for i in range(len(correlation_matrix.columns)):
-      #   for j in range(i):
-            # if abs(correlation_matrix.iloc[i, j]) > 0.8:
-                # col1 = correlation_matrix.columns[i]
-                # col2 = correlation_matrix.columns[j]
-                # highly_dependent_columns.add(col1)
-                # highly_dependent_columns.add(col2)
+    correlation_matrix = df.corr()
+    for i in range(len(correlation_matrix.columns)):
+        for j in range(i):
+            if abs(correlation_matrix.iloc[i, j]) > 0.8:
+                col1 = correlation_matrix.columns[i]
+                col2 = correlation_matrix.columns[j]
+                highly_dependent_columns.add(col1)
+                highly_dependent_columns.add(col2)
 
     num_highly_dependent_columns = len(highly_dependent_columns)
 
@@ -358,21 +375,6 @@ def handle_missing_values(df):
         df[numeric_columns] = df[numeric_columns].fillna(fill_value)
 
   
-    label_encoders = {}
-    for col in textual_columns:
-        if col not in df.columns:
-            continue
-        le = LabelEncoder()
-        df[col] = df[col].fillna("")  # Fill missing values with empty strings
-        df[col] = le.fit_transform(df[col])
-        # Store the label encoder for inverse transformation
-        label_encoders[col] = le
-
-        # Add another column for reverse inverse label encoding
-        #df[f'{col}_inverse'] = le.inverse_transform(df[col])
-
-    st.dataframe(df)
-
     return df
 
 def drop_column(df):
