@@ -421,7 +421,7 @@ def build_model(dense_layers,dropout):
     return model
 
 def train_regression_model(df):
-    st.subheader("6. Train a Custom Time Series model")
+    st.subheader("6. Train a model")
 
     if df.empty:
         st.warning("Please upload a valid dataset.")
