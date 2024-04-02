@@ -225,14 +225,14 @@ def analyze_csv(df):
 
     # In this example, let's assume highly dependent columns are those with correlation coefficient above 0.8
     highly_dependent_columns = set()
-    #correlation_matrix = df.corr()
-    #for i in range(len(correlation_matrix.columns)):
-     #   for j in range(i):
-      #      if abs(correlation_matrix.iloc[i, j]) > 0.8:
-       #         col1 = correlation_matrix.columns[i]
-        #        col2 = correlation_matrix.columns[j]
-         #       highly_dependent_columns.add(col1)
-          #      highly_dependent_columns.add(col2)
+    correlation_matrix = df.corr()
+    for i in range(len(correlation_matrix.columns)):
+        for j in range(i):
+            if abs(correlation_matrix.iloc[i, j]) > 0.8:
+                col1 = correlation_matrix.columns[i]
+                col2 = correlation_matrix.columns[j]
+                highly_dependent_columns.add(col1)
+                highly_dependent_columns.add(col2)
 
     num_highly_dependent_columns = len(highly_dependent_columns)
 
@@ -577,11 +577,11 @@ def main():
         df = load_data(uploaded_file)
 
         if not df.select_dtypes(include=['number']).empty:
-            #show_correlation(df)
+            show_correlation(df)
             show_missing_values(df)
             df = handle_missing_values(df)
         if not df.select_dtypes(include=['object']).empty:
-            #show_correlation(df)
+            show_correlation(df)
             show_missing_values(df)
             df = handle_missing_values(df)
 
