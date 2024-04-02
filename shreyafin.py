@@ -576,7 +576,7 @@ def main():
         
         if not df.select_dtypes(include=['number']).empty or df.select_dtypes(include=['object']).empty :
             show_missing_values(df)
-            #show_correlation(df)
+            show_correlation(df)
             df = handle_missing_values(df)
             
         
