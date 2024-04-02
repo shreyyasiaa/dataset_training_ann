@@ -530,7 +530,8 @@ def train_regression_model(df):
         st.write("Final Validation loss is-", val_loss[-1])
         st.write("Training losses", train_loss)
         st.write("Validation losses", val_loss)
-        accuracy = accuracy_score(y_test, y_pred)
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test,y_pred)
         st.write("ANN Accuracy:", accuracy)
 
         ploty()
