@@ -236,7 +236,7 @@ def analyze_csv(df):
 
     st.dataframe(df)
 
-    return df
+    
     highly_dependent_columns = set()
     correlation_matrix = df.corr()
     for i in range(len(correlation_matrix.columns)):
