@@ -354,7 +354,7 @@ def show_missing_values(df):
     st.subheader("3. Show the number of missing values in each column")
     missing_values = df.isnull().sum()
     st.dataframe(missing_values)
-    st.write(output_array_d)
+   # st.write(output_array_d)
 
 def handle_missing_values(df):
     st.subheader("4. Handle missing values")
