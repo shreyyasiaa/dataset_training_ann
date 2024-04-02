@@ -220,23 +220,19 @@ def analyze_csv(df):
         elif pd.api.types.is_numeric_dtype(df[col]):
             num_numeric_columns += 1
 
-    # Find highly dependent columns (you may need to define what "highly dependent" means)
-    # For example, you can use correlation coefficients or other statistical measures
-
-    # In this example, let's assume highly dependent columns are those with correlation coefficient above 0.8
-    # highly_dependent_columns = set()
-    # correlation_matrix = df.corr()
-    # for i in range(len(correlation_matrix.columns)):
-        # for j in range(i):
+     highly_dependent_columns = set()
+     #correlation_matrix = df.corr()
+     #for i in range(len(correlation_matrix.columns)):
+      #   for j in range(i):
             # if abs(correlation_matrix.iloc[i, j]) > 0.8:
                 # col1 = correlation_matrix.columns[i]
                 # col2 = correlation_matrix.columns[j]
                 # highly_dependent_columns.add(col1)
                 # highly_dependent_columns.add(col2)
 
-    # num_highly_dependent_columns = len(highly_dependent_columns)
+    num_highly_dependent_columns = len(highly_dependent_columns)
 
-    # Output the results
+        ##Output the results
     st.write("Number Of Records:", num_records)
     st.write("Number Of Columns:", num_columns)
     st.write("Number of Date Columns:", num_date_columns)
