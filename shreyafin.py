@@ -341,7 +341,7 @@ def load_data(file):
     return df
 
 def show_correlation(df):
-    st.subheader("2. Show the correlation matrix and heatmap")
+    st.subheader("3. Show the correlation matrix and heatmap")
     numeric_columns = df.select_dtypes(include=['number']).columns
     correlation_matrix = df[numeric_columns].corr()
     st.dataframe(correlation_matrix)
@@ -351,7 +351,7 @@ def show_correlation(df):
     st.pyplot(fig)
 
 def show_missing_values(df):
-    st.subheader("3. Show the number of missing values in each column")
+    st.subheader("2. Show the number of missing values in each column")
     missing_values = df.isnull().sum()
     st.dataframe(missing_values)
    # st.write(output_array_d)
