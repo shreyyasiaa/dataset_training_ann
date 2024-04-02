@@ -234,7 +234,7 @@ def analyze_csv(df):
          #       highly_dependent_columns.add(col1)
           #      highly_dependent_columns.add(col2)
 
-    #num_highly_dependent_columns = len(highly_dependent_columns)
+    num_highly_dependent_columns = len(highly_dependent_columns)
 
     # Output the results
     st.write("Number Of Records:", num_records)
