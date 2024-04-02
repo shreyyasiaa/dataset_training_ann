@@ -576,14 +576,11 @@ def main():
         st.info("File uploaded successfully!")
         df = load_data(uploaded_file)
 
-        if not df.select_dtypes(include=['number']).empty:
+        if not df.select_dtypes(include=['number']).empty or df.select_dtypes(include=['object']).empty :
             #show_correlation(df)
             show_missing_values(df)
             df = handle_missing_values(df)
-        if not df.select_dtypes(include=['object']).empty:
-            #show_correlation(df)
-            show_missing_values(df)
-            df = handle_missing_values(df)
+        
 
         df = drop_column(df)
         train_regression_model(df)
