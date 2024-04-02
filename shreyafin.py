@@ -575,10 +575,11 @@ def main():
     if uploaded_file is not None:
         st.info("File uploaded successfully!")
         df = load_data(uploaded_file)
-        df = handle_missing_values(df)
+        
         if not df.select_dtypes(include=['number']).empty or df.select_dtypes(include=['object']).empty :
             show_missing_values(df)
             show_correlation(df)
+            df = handle_missing_values(df)
             
         
         
