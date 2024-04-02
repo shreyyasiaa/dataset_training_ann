@@ -575,7 +575,7 @@ def main():
         df = load_data(uploaded_file)
         
         if not df.select_dtypes(include=['number']).empty or df.select_dtypes(include=['object']).empty :
-            show_missing_values(df)
+            show_missing_values(df)#hi
             show_correlation(df)
             df = handle_missing_values(df)
             
