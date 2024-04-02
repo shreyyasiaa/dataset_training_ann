@@ -493,9 +493,9 @@ def train_regression_model(df):
         # Save the best LazyPredict model
         lp_model_filename = f"best_lp_model.pkl"
         joblib.dump(best_lp_model, lp_model_filename)
-
+        st.write("Yayyyy yipeee!! Now we`re done with processing and training the model!🥳🎉")
         # Provide a download button for the best LazyPredict model
-        st.subheader("Download Best LazyPredict Model")
+        st.subheader("7.Download Best LazyPredict Model")
         st.write("Click the button below to download the best LazyPredict model:")
         st.download_button(label="Download LazyPredict Model", data=open(lp_model_filename, "rb").read(), file_name=lp_model_filename)
         
@@ -537,13 +537,13 @@ def train_regression_model(df):
         model.save(model_filename)
         st.success(f"Model saved as {model_filename}")
 
-        st.subheader("8.Download the trained model")
+        st.subheader("7.Download the trained model")
         st.download_button(label="Download Model", data=open(model_filename, "rb").read(), file_name=model_filename)
         # Save LazyPredict models
 
 
 def ploty():
-  st.subheader("7.Plotting the loss vs epoch graph")
+  st.subheader("Plotting the loss vs epoch graph")
   epochsi = range(1, len(train_loss) + 1)
 
   plt.plot(epochsi, train_loss, 'bo', label='Training loss') # 'bo' = blue dots
@@ -562,7 +562,7 @@ def ploty():
 
 
 def download_updated_dataset(df):
-    st.subheader("9. Download the updated dataset")
+    st.subheader("8. Download the updated dataset")
     csv_file = df.to_csv(index=False)
     st.download_button("Download CSV", csv_file, "Updated_Dataset.csv", key="csv_download")
 
