@@ -580,6 +580,10 @@ def main():
             #show_correlation(df)
             show_missing_values(df)
             df = handle_missing_values(df)
+        if not df.select_dtypes(include=['object']).empty:
+            #show_correlation(df)
+            show_missing_values(df)
+            df = handle_missing_values(df)
 
         df = drop_column(df)
         train_regression_model(df)
