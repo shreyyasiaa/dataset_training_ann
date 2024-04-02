@@ -220,7 +220,7 @@ def analyze_csv(df):
         elif pd.api.types.is_numeric_dtype(df[col]):
             num_numeric_columns += 1
 
-     highly_dependent_columns = set()
+    highly_dependent_columns = set()
      #correlation_matrix = df.corr()
      #for i in range(len(correlation_matrix.columns)):
       #   for j in range(i):
