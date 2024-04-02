@@ -484,7 +484,7 @@ def train_regression_model(df):
    
     if proceed_with_ann:
         st.write("One or more models from LazyPredict have accuracy more than 80%. Skipping ANN training.")
-        sorted_results = {k: v for k, v in sorted(results.items(), key=lambda item: item[1])}
+        sorted_results = {k: v for k, v in sorted(results.items(), key=lambda item: item[1], reverse=True)}
        
         for model, accuracy in sorted_results.items():
             st.write(f"- {model}: {accuracy:.2f}%")
